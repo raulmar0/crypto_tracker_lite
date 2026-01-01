@@ -1,5 +1,6 @@
 import 'package:crypto_tracker_lite/models/crypto_model.dart';
 import 'package:crypto_tracker_lite/widgets/crypto_list_tile.dart';
+import 'package:crypto_tracker_lite/widgets/custom_drawer.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -88,11 +89,12 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const CustomDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text('CryptoTracker Lite'),
-        leading: IconButton(icon: const Icon(Icons.menu), onPressed: () {}),
+        // leading is automatically handled by Scaffold when drawer is present
         actions: [
           IconButton(icon: const Icon(Icons.more_horiz), onPressed: () {}),
         ],
