@@ -45,7 +45,11 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
   @override
   Widget build(BuildContext context) {
     final crypto = widget.crypto;
-    final currencyFormatter = NumberFormat.simpleCurrency(decimalDigits: 2);
+    // Use more decimals for small prices
+    final int decimals = crypto.currentPrice < 1 ? 6 : 2;
+    final currencyFormatter = NumberFormat.simpleCurrency(
+      decimalDigits: decimals,
+    );
     final isPositive = crypto.priceChangePercentage24h >= 0;
     final color = isPositive ? Colors.greenAccent : Colors.redAccent;
 
@@ -285,15 +289,24 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
       );
     }
 
-    final minY = _priceHistory.reduce((a, b) => a < b ? a : b) * 0.98;
-    final maxY = _priceHistory.reduce((a, b) => a > b ? a : b) * 1.02;
+    final dataMin = _priceHistory.reduce((a, b) => a < b ? a : b);
+    final dataMax = _priceHistory.reduce((a, b) => a > b ? a : b);
+    final dataRange = dataMax - dataMin;
+
+    // Use 2% padding to match CoinGecko's chart style
+    final padding = dataRange * 0.02;
+    final minY = dataMin - padding;
+    final maxY = dataMax + padding;
+
+    // Calculate appropriate interval for grid lines
+    final interval = dataRange > 0 ? dataRange / 4 : dataMin * 0.001;
 
     return LineChart(
       LineChartData(
         gridData: FlGridData(
           show: true,
           drawVerticalLine: false,
-          horizontalInterval: (maxY - minY) / 4,
+          horizontalInterval: interval,
           getDrawingHorizontalLine: (value) {
             return const FlLine(
               color: Colors.white10,
@@ -335,7 +348,7 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
           leftTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 50,
+              reservedSize: 60,
               interval: (maxY - minY) / 3,
               getTitlesWidget: (value, meta) {
                 if (value >= 1000) {
@@ -344,8 +357,10 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
                     style: const TextStyle(color: Colors.grey, fontSize: 10),
                   );
                 }
+                // For values under 1, show more decimals
+                final int chartDecimals = value < 1 ? 6 : 2;
                 return Text(
-                  '\$${value.toStringAsFixed(2)}',
+                  '\$${value.toStringAsFixed(chartDecimals)}',
                   style: const TextStyle(color: Colors.grey, fontSize: 10),
                 );
               },

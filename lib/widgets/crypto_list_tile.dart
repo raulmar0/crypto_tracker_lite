@@ -12,7 +12,11 @@ class CryptoListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormatter = NumberFormat.simpleCurrency(decimalDigits: 2);
+    // Use more decimals for small prices (stablecoins, small tokens)
+    final int decimals = crypto.currentPrice < 1 ? 6 : 2;
+    final currencyFormatter = NumberFormat.simpleCurrency(
+      decimalDigits: decimals,
+    );
 
     final isPositive = crypto.priceChangePercentage24h >= 0;
     final color = isPositive ? Colors.greenAccent : Colors.redAccent;
