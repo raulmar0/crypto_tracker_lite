@@ -7,10 +7,10 @@ class ErrorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
-      body: Padding(
-        padding: const EdgeInsets.all(30.0),
+    return Container(
+      color: const Color(0xFF1A1A1A),
+      padding: const EdgeInsets.all(30.0),
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -54,7 +54,14 @@ class ErrorPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: onRetry ?? () {},
+                onPressed: () {
+                  print('[ERROR_PAGE] Retry button pressed');
+                  if (onRetry != null) {
+                    onRetry!();
+                  } else {
+                    print('[ERROR_PAGE] onRetry callback is null!');
+                  }
+                },
                 icon: const Icon(Icons.refresh, color: Colors.white),
                 label: const Text(
                   'Reintentar',

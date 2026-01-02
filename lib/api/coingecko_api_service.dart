@@ -28,54 +28,76 @@ class CoinGeckoApiService {
   /// Fetch list of cryptocurrencies
   Future<List<Map<String, dynamic>>> getMarkets() async {
     const cacheKey = 'markets';
+    print('[API] getMarkets() called');
 
     // Check cache
     if (_isCacheValid(cacheKey)) {
+      print('[API] Returning cached data');
       return List<Map<String, dynamic>>.from(_cache[cacheKey]!.data as List);
     }
 
+    print('[API] Cache miss, making HTTP request...');
     final uri = Uri.parse('$_baseUrl/coins/markets?vs_currency=usd');
-    final response = await http.get(uri);
 
-    _handleErrors(response);
+    try {
+      final response = await http.get(uri);
+      print('[API] Response status: ${response.statusCode}');
 
-    final List<dynamic> data = json.decode(response.body);
-    final result = data.cast<Map<String, dynamic>>();
+      _handleErrors(response);
 
-    // Store in cache
-    _cache[cacheKey] = _CacheEntry(result, DateTime.now());
+      final List<dynamic> data = json.decode(response.body);
+      final result = data.cast<Map<String, dynamic>>();
+      print('[API] Parsed ${result.length} items');
 
-    return result;
+      // Store in cache
+      _cache[cacheKey] = _CacheEntry(result, DateTime.now());
+
+      return result;
+    } catch (e) {
+      print('[API] Exception: $e');
+      rethrow;
+    }
   }
 
   /// Fetch 7-day price chart for a specific coin
   Future<List<double>> getMarketChart(String coinId) async {
     final cacheKey = 'chart_$coinId';
+    print('[API] getMarketChart() called with coinId: $coinId');
 
     // Check cache
     if (_isCacheValid(cacheKey)) {
+      print('[API] Returning cached chart data for $coinId');
       return List<double>.from(_cache[cacheKey]!.data as List);
     }
 
     final uri = Uri.parse(
       '$_baseUrl/coins/$coinId/market_chart?vs_currency=usd&days=7',
     );
-    final response = await http.get(uri);
+    print('[API] Chart URL: $uri');
 
-    _handleErrors(response);
+    try {
+      final response = await http.get(uri);
+      print('[API] Chart response status: ${response.statusCode}');
 
-    final Map<String, dynamic> data = json.decode(response.body);
-    final List<dynamic> prices = data['prices'] as List<dynamic>? ?? [];
+      _handleErrors(response);
 
-    // Extract just the price values (second element of each [timestamp, price])
-    final List<double> priceHistory = prices
-        .map((item) => (item[1] as num).toDouble())
-        .toList();
+      final Map<String, dynamic> data = json.decode(response.body);
+      final List<dynamic> prices = data['prices'] as List<dynamic>? ?? [];
 
-    // Store in cache
-    _cache[cacheKey] = _CacheEntry(priceHistory, DateTime.now());
+      // Extract just the price values (second element of each [timestamp, price])
+      final List<double> priceHistory = prices
+          .map((item) => (item[1] as num).toDouble())
+          .toList();
+      print('[API] Chart data: ${priceHistory.length} price points');
 
-    return priceHistory;
+      // Store in cache
+      _cache[cacheKey] = _CacheEntry(priceHistory, DateTime.now());
+
+      return priceHistory;
+    } catch (e) {
+      print('[API] Chart exception: $e');
+      rethrow;
+    }
   }
 
   /// Fetch coin details including description

@@ -1,6 +1,7 @@
 import 'package:crypto_tracker_lite/logic/favorites_bloc.dart';
 import 'package:crypto_tracker_lite/models/crypto_model.dart';
 import 'package:crypto_tracker_lite/api/coingecko_api_service.dart';
+import 'package:crypto_tracker_lite/widgets/error_banner.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,6 +20,7 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
   List<double> _priceHistory = [];
   bool _isLoadingChart = true;
   String? _chartError;
+  bool _isRateLimited = false;
 
   String _description = '';
   bool _isLoadingDescription = true;
@@ -38,6 +40,12 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
         _priceHistory = history;
         _isLoadingChart = false;
       });
+    } on RateLimitException {
+      setState(() {
+        _chartError = 'Rate limit exceeded';
+        _isLoadingChart = false;
+        _isRateLimited = true;
+      });
     } catch (e) {
       setState(() {
         _chartError = 'Error loading chart';
@@ -54,12 +62,24 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
         _description = description;
         _isLoadingDescription = false;
       });
+    } on RateLimitException {
+      setState(() {
+        _description = 'Error loading description';
+        _isLoadingDescription = false;
+        _isRateLimited = true;
+      });
     } catch (e) {
       setState(() {
         _description = 'Error loading description';
         _isLoadingDescription = false;
       });
     }
+  }
+
+  void _dismissRateLimitBanner() {
+    setState(() {
+      _isRateLimited = false;
+    });
   }
 
   @override
@@ -103,237 +123,259 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
-              // Header: Icon + Name
-              Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white10,
-                    ),
-                    child: ClipOval(
-                      child: Image.network(
-                        crypto.image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(
-                              Icons.currency_bitcoin,
-                              color: Colors.orange,
-                              size: 40,
-                            ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 15),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        crypto.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        crypto.symbol,
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-              // Price Section
-              const Text(
-                'Precio actual',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
-              ),
-              const SizedBox(height: 5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    currencyFormatter.format(crypto.currentPrice),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: color.withValues(alpha: 0.5)),
-                    ),
-                    child: Row(
+      body: Column(
+        children: [
+          // Error banner for rate limit
+          if (_isRateLimited)
+            ErrorBanner(
+              title: 'Límite de solicitudes excedido.',
+              subtitle: 'Algunos datos pueden no estar disponibles.',
+              onDismiss: _dismissRateLimitBanner,
+            ),
+          // Main scrollable content
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 10),
+                    // Header: Icon + Name
+                    Row(
                       children: [
-                        Icon(
-                          isPositive
-                              ? Icons.arrow_drop_up
-                              : Icons.arrow_drop_down,
-                          color: color,
-                        ),
-                        Text(
-                          '${isPositive ? '+' : ''}${crypto.priceChangePercentage24h.toStringAsFixed(2)}%',
-                          style: TextStyle(
-                            color: color,
-                            fontWeight: FontWeight.bold,
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white10,
                           ),
+                          child: ClipOval(
+                            child: Image.network(
+                              crypto.image,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
+                                    Icons.currency_bitcoin,
+                                    color: Colors.orange,
+                                    size: 40,
+                                  ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              crypto.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              crypto.symbol,
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-              // Stats Grid
-              GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
-                childAspectRatio: 1.6,
-                children: [
-                  _buildStatCard(
-                    title: 'Máximo 24h',
-                    value: currencyFormatter.format(crypto.high24h),
-                    icon: Icons.trending_up,
-                    iconColor: Colors.greenAccent,
-                  ),
-                  _buildStatCard(
-                    title: 'Mínimo 24h',
-                    value: currencyFormatter.format(crypto.low24h),
-                    icon: Icons.trending_down,
-                    iconColor: Colors.redAccent,
-                  ),
-                  _buildStatCard(
-                    title: 'Capitalización',
-                    value:
-                        '\$${(crypto.marketCap / 1000000000).toStringAsFixed(2)}B',
-                    icon: Icons.account_balance_wallet,
-                    iconColor: Colors.blueAccent,
-                  ),
-                  _buildStatCard(
-                    title: 'Volumen 24h',
-                    value:
-                        '\$${(crypto.totalVolume / 1000000).toStringAsFixed(2)}M',
-                    icon: Icons.compare_arrows,
-                    iconColor: Colors.orangeAccent,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
-              // Chart Section
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2C2C2C),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white10),
-                ),
-                child: Column(
-                  children: [
+                    const SizedBox(height: 30),
+                    // Price Section
+                    const Text(
+                      'Precio actual',
+                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                    const SizedBox(height: 5),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Precio histórico (7 días)',
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        Text(
+                          currencyFormatter.format(crypto.currentPrice),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
+                            horizontal: 12,
+                            vertical: 6,
                           ),
                           decoration: BoxDecoration(
                             color: color.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(5),
+                            borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: color.withValues(alpha: 0.5),
                             ),
                           ),
-                          child: Text(
-                            currencyFormatter.format(crypto.currentPrice),
-                            style: TextStyle(
-                              color: color,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                isPositive
+                                    ? Icons.arrow_drop_up
+                                    : Icons.arrow_drop_down,
+                                color: color,
+                              ),
+                              Text(
+                                '${isPositive ? '+' : ''}${crypto.priceChangePercentage24h.toStringAsFixed(2)}%',
+                                style: TextStyle(
+                                  color: color,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    SizedBox(height: 200, child: _buildChart(color)),
+                    const SizedBox(height: 30),
+                    // Stats Grid
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 15,
+                      mainAxisSpacing: 15,
+                      childAspectRatio: 1.6,
+                      children: [
+                        _buildStatCard(
+                          title: 'Máximo 24h',
+                          value: currencyFormatter.format(crypto.high24h),
+                          icon: Icons.trending_up,
+                          iconColor: Colors.greenAccent,
+                        ),
+                        _buildStatCard(
+                          title: 'Mínimo 24h',
+                          value: currencyFormatter.format(crypto.low24h),
+                          icon: Icons.trending_down,
+                          iconColor: Colors.redAccent,
+                        ),
+                        _buildStatCard(
+                          title: 'Capitalización',
+                          value:
+                              '\$${(crypto.marketCap / 1000000000).toStringAsFixed(2)}B',
+                          icon: Icons.account_balance_wallet,
+                          iconColor: Colors.blueAccent,
+                        ),
+                        _buildStatCard(
+                          title: 'Volumen 24h',
+                          value:
+                              '\$${(crypto.totalVolume / 1000000).toStringAsFixed(2)}M',
+                          icon: Icons.compare_arrows,
+                          iconColor: Colors.orangeAccent,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 30),
+                    // Chart Section
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2C2C2C),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white10),
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Precio histórico (7 días)',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: color.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(5),
+                                  border: Border.all(
+                                    color: color.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                child: Text(
+                                  currencyFormatter.format(crypto.currentPrice),
+                                  style: TextStyle(
+                                    color: color,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          SizedBox(height: 200, child: _buildChart(color)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    // Acerca de Section
+                    const Text(
+                      'Acerca de',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2D2D2D),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.grey.shade800,
+                          width: 1.0,
+                        ),
+                      ),
+                      child: _isLoadingDescription
+                          ? const Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20),
+                                child: SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.yellow,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : Text(
+                              _description.isNotEmpty
+                                  ? _description
+                                  : 'No hay descripción disponible.',
+                              style: TextStyle(
+                                color: Colors.grey.shade400,
+                                fontSize: 15,
+                                height: 1.5,
+                              ),
+                            ),
+                    ),
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),
-              const SizedBox(height: 30),
-              // Acerca de Section
-              const Text(
-                'Acerca de',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2D2D2D),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade800, width: 1.0),
-                ),
-                child: _isLoadingDescription
-                    ? const Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 20),
-                          child: SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.yellow,
-                            ),
-                          ),
-                        ),
-                      )
-                    : Text(
-                        _description.isNotEmpty
-                            ? _description
-                            : 'No hay descripción disponible.',
-                        style: TextStyle(
-                          color: Colors.grey.shade400,
-                          fontSize: 15,
-                          height: 1.5,
-                        ),
-                      ),
-              ),
-              const SizedBox(height: 30),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

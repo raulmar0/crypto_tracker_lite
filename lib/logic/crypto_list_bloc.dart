@@ -15,6 +15,8 @@ class LoadCryptos extends CryptoListEvent {}
 
 class RetryCryptos extends CryptoListEvent {}
 
+class DismissError extends CryptoListEvent {}
+
 // States
 abstract class CryptoListState extends Equatable {
   const CryptoListState();
@@ -29,11 +31,17 @@ class CryptoListLoading extends CryptoListState {}
 
 class CryptoListLoaded extends CryptoListState {
   final List<CryptoModel> cryptos;
+  final bool hasError;
+  final String? errorMessage;
 
-  const CryptoListLoaded(this.cryptos);
+  const CryptoListLoaded(
+    this.cryptos, {
+    this.hasError = false,
+    this.errorMessage,
+  });
 
   @override
-  List<Object?> get props => [cryptos];
+  List<Object?> get props => [cryptos, hasError, errorMessage];
 }
 
 class CryptoListError extends CryptoListState {
@@ -49,30 +57,65 @@ class CryptoListError extends CryptoListState {
 // Bloc
 class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
   final CoinGeckoApiService apiService;
+  List<CryptoModel> _cachedCryptos = [];
 
   CryptoListBloc(this.apiService) : super(CryptoListInitial()) {
     on<LoadCryptos>(_onLoadCryptos);
     on<RetryCryptos>(_onRetryCryptos);
+    on<DismissError>(_onDismissError);
   }
 
   Future<void> _onLoadCryptos(
     LoadCryptos event,
     Emitter<CryptoListState> emit,
   ) async {
-    emit(CryptoListLoading());
+    print('[BLOC] _onLoadCryptos called');
+    // Only show loading if we have no cached data
+    if (_cachedCryptos.isEmpty) {
+      print('[BLOC] No cached data, emitting CryptoListLoading');
+      emit(CryptoListLoading());
+    }
 
     try {
+      print('[BLOC] Calling apiService.getMarkets()');
       final jsonList = await apiService.getMarkets();
+      print('[BLOC] Got ${jsonList.length} items from API');
       final cryptos = jsonList
           .map((json) => CryptoModel.fromJson(json))
           .toList();
+      _cachedCryptos = cryptos;
+      print('[BLOC] Emitting CryptoListLoaded with ${cryptos.length} items');
       emit(CryptoListLoaded(cryptos));
     } on RateLimitException catch (e) {
-      emit(CryptoListError(e.message, isRateLimited: true));
+      print('[BLOC] RateLimitException: ${e.message}');
+      _emitErrorState(emit, e.message, isRateLimited: true);
     } on ApiException catch (e) {
-      emit(CryptoListError(e.message));
+      print('[BLOC] ApiException: ${e.message}');
+      _emitErrorState(emit, e.message);
     } catch (e) {
-      emit(CryptoListError('Error loading data: $e'));
+      _emitErrorState(emit, 'Error loading data: $e');
+    }
+  }
+
+  void _emitErrorState(
+    Emitter<CryptoListState> emit,
+    String message, {
+    bool isRateLimited = false,
+  }) {
+    if (_cachedCryptos.isNotEmpty) {
+      // Show cached data with banner
+      emit(
+        CryptoListLoaded(_cachedCryptos, hasError: true, errorMessage: message),
+      );
+    } else {
+      // Show full error page
+      emit(CryptoListError(message, isRateLimited: isRateLimited));
+    }
+  }
+
+  void _onDismissError(DismissError event, Emitter<CryptoListState> emit) {
+    if (_cachedCryptos.isNotEmpty) {
+      emit(CryptoListLoaded(_cachedCryptos));
     }
   }
 
@@ -80,6 +123,7 @@ class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
     RetryCryptos event,
     Emitter<CryptoListState> emit,
   ) async {
+    print('[BLOC] _onRetryCryptos called - clearing cache');
     apiService.clearCache();
     await _onLoadCryptos(LoadCryptos(), emit);
   }
