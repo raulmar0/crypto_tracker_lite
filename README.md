@@ -225,10 +225,5 @@ MultiRepositoryProvider(
 | <img src="screenshots/list.png" width="200"> | <img src="screenshots/detail1.png" width="200"> | <img src="screenshots/detail2.png" width="200"> | <img src="screenshots/profile.png" width="200"> |
 
 ## 🎬 Demo
-
-
-
-## 📄 Licencia
-
-Este proyecto fue desarrollado como parte de un reto técnico.
+https://youtu.be/T5FXkl7r4Ug
 
