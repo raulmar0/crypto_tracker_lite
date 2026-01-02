@@ -21,7 +21,7 @@ class CoinDetailPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Detalle'),
         centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF222222),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
@@ -116,6 +116,7 @@ class CoinDetailPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: color.withValues(alpha: 0.2), // Use withValues
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: color.withValues(alpha: 0.5)),
                     ),
                     child: Row(
                       children: [
@@ -182,6 +183,7 @@ class CoinDetailPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFF2C2C2C),
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white10),
                 ),
                 child: Column(
                   children: [
@@ -198,13 +200,16 @@ class CoinDetailPage extends StatelessWidget {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.redAccent.withValues(alpha: 0.2),
+                            color: color.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(5),
+                            border: Border.all(
+                              color: color.withValues(alpha: 0.5),
+                            ),
                           ),
                           child: Text(
                             currencyFormatter.format(crypto.price),
-                            style: const TextStyle(
-                              color: Colors.redAccent,
+                            style: TextStyle(
+                              color: color,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -315,17 +320,17 @@ class CoinDetailPage extends StatelessWidget {
                                   )
                                   .toList(),
                               isCurved: true,
-                              color: Colors.redAccent,
+                              color: color,
                               barWidth: 3,
                               isStrokeCapRound: true,
                               dotData: const FlDotData(show: false),
                               belowBarData: BarAreaData(
                                 show: true,
-                                color: Colors.redAccent.withValues(alpha: 0.1),
+                                color: color.withValues(alpha: 0.1),
                                 gradient: LinearGradient(
                                   colors: [
-                                    Colors.redAccent.withValues(alpha: 0.3),
-                                    Colors.redAccent.withValues(alpha: 0.0),
+                                    color.withValues(alpha: 0.3),
+                                    color.withValues(alpha: 0.0),
                                   ],
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
@@ -356,6 +361,7 @@ class CoinDetailPage extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: const Color(0xFF2C2C2C),
                     borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.white10),
                   ),
                   child: Text(
                     crypto.description,
@@ -386,6 +392,7 @@ class CoinDetailPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF2C2C2C),
         borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: Colors.white10),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -15,58 +15,66 @@ class CustomDrawer extends StatelessWidget {
         // Ensure content is not hidden by notches/status bars
         child: Column(
           children: [
-            const SizedBox(height: 30),
-            // Header
-            Center(
-              child: Stack(
-                alignment: Alignment.center,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.only(top: 30, bottom: 40),
+              color: const Color(0xFF222222),
+              child: Column(
                 children: [
-                  // Glowing effect
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.yellow.withValues(alpha: 0.6),
-                          blurRadius: 20,
-                          spreadRadius: 2,
+                  // Header
+                  Center(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Glowing effect
+                        Container(
+                          width: 100,
+                          height: 100,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.yellow.withValues(alpha: 0.6),
+                                blurRadius: 20,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Avatar
+                        Container(
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.yellow, width: 2),
+                            image: const DecorationImage(
+                              image: NetworkImage(
+                                'https://i.pravatar.cc/300?img=11',
+                              ), // Placeholder image
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  // Avatar
-                  Container(
-                    width: 90,
-                    height: 90,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.yellow, width: 2),
-                      image: const DecorationImage(
-                        image: NetworkImage(
-                          'https://i.pravatar.cc/300?img=11',
-                        ), // Placeholder image
-                        fit: BoxFit.cover,
-                      ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Bryan Vazquez',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  const SizedBox(height: 5),
+                  const Text(
+                    'bryan@correo.com',
+                    style: TextStyle(color: Colors.grey, fontSize: 14),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Bryan Vazquez',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 5),
-            const Text(
-              'bryan@correo.com',
-              style: TextStyle(color: Colors.grey, fontSize: 14),
             ),
             const SizedBox(height: 40),
 
@@ -134,6 +142,7 @@ class CustomDrawer extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF2C2C2C), // Lighter background for items
         borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: iconColor.withValues(alpha: 0.5)),
       ),
       child: ListTile(
         onTap: onTap,

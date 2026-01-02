@@ -10,7 +10,7 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Mi perfil'),
         centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF222222),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
@@ -26,58 +26,70 @@ class ProfilePage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 30),
-            // Avatar with Glow
-            Center(
-              child: Stack(
-                alignment: Alignment.center,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.only(top: 30, bottom: 40),
+              decoration: const BoxDecoration(
+                // Using a slightly different shade or just let it depend on the design image which seemed to have a top section
+                // If the user wants a background "dividing the section", likely a different color or just the top part
+                color: Color(0xFF222222),
+              ),
+              child: Column(
                 children: [
-                  // Glowing effect
-                  Container(
-                    width: 140,
-                    height: 140,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.yellow.withValues(alpha: 0.6),
-                          blurRadius: 30,
-                          spreadRadius: 2,
+                  // Avatar with Glow
+                  Center(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Glowing effect
+                        Container(
+                          width: 140,
+                          height: 140,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.yellow.withValues(alpha: 0.6),
+                                blurRadius: 30,
+                                spreadRadius: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Avatar
+                        Container(
+                          width: 130,
+                          height: 130,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.yellow, width: 3),
+                            image: const DecorationImage(
+                              image: NetworkImage(
+                                'https://i.pravatar.cc/300?img=11',
+                              ), // Placeholder image
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  // Avatar
-                  Container(
-                    width: 130,
-                    height: 130,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.yellow, width: 3),
-                      image: const DecorationImage(
-                        image: NetworkImage(
-                          'https://i.pravatar.cc/300?img=11',
-                        ), // Placeholder image
-                        fit: BoxFit.cover,
-                      ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Bryan Vazquez',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  const SizedBox(height: 5),
+                  const Text(
+                    'bryan@correo.com',
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Bryan Vazquez',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 5),
-            const Text(
-              'bryan@correo.com',
-              style: TextStyle(color: Colors.grey, fontSize: 16),
             ),
             const SizedBox(height: 40),
             // Info Card
@@ -88,6 +100,7 @@ class ProfilePage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFF2C2C2C),
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white10),
                 ),
                 child: Column(
                   children: [

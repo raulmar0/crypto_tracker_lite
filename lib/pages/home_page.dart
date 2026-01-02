@@ -19,8 +19,9 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       drawer: const CustomDrawer(),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF222222),
         elevation: 0,
+        centerTitle: true,
         title: const Text('CryptoTracker Lite'),
         // leading is automatically handled by Scaffold when drawer is present
         actions: [
