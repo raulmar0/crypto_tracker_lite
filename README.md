@@ -12,10 +12,13 @@ Una aplicación móvil desarrollada en **Flutter** que permite consultar informa
 - ✅ Detalle de cada moneda con precio actual, máximo/mínimo 24h
 - ✅ Gráfica interactiva de precios de los últimos 7 días
 - ✅ Sistema de favoritos persistente
-- ✅ Perfil de usuario
-- ✅ Modo oscuro
+- ✅ Perfil de usuario (Isaac del Toro) con mail icon
+- ✅ Modo oscuro con estética premium
+- ✅ Soporte multi-idioma (Español, Inglés, Francés, Coreano)
+- ✅ Configuración persistente (Idioma)
+- ✅ Precios hardcodeados a USD con formato `[cantidad] US$`
 - ✅ Caché en memoria para optimización
-- ✅ Manejo de errores y rate limiting
+- ✅ Manejo de errores y rate limiting (HTTP 429)
 
 ## 🛠️ Requisitos Previos
 
@@ -29,7 +32,7 @@ Una aplicación móvil desarrollada en **Flutter** que permite consultar informa
 ### 1. Clonar el repositorio
 
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/raulmar0/crypto_tracker_lite.git
 cd crypto_tracker_lite
 ```
 
@@ -80,7 +83,14 @@ lib/
 │   └── coingecko_api_service.dart
 ├── logic/                  # BLoCs (lógica de negocio)
 │   ├── crypto_list_bloc.dart
-│   └── favorites_bloc.dart
+│   ├── favorites_bloc.dart
+│   └── settings_bloc.dart
+├── l10n/                   # Internacionalización (L10n)
+│   ├── app_localizations.dart
+│   ├── app_localizations_en.dart
+│   ├── app_localizations_es.dart
+│   ├── app_localizations_fr.dart
+│   └── app_localizations_ko.dart
 ├── models/                 # Modelos de datos
 │   └── crypto_model.dart
 ├── pages/                  # Pantallas de la app
@@ -88,6 +98,7 @@ lib/
 │   ├── coin_detail_page.dart
 │   ├── favorites_page.dart
 │   ├── profile_page.dart
+│   ├── settings_page.dart
 │   └── error_page.dart
 ├── providers/              # Inyección de dependencias
 │   └── app_providers.dart
@@ -127,6 +138,7 @@ lib/
 - Implementación de BLoCs con Events y States
 - `CryptoListBloc`: Maneja la lista de criptomonedas
 - `FavoritesBloc`: Maneja el sistema de favoritos
+- `SettingsBloc`: Maneja la configuración (Idioma)
 
 #### 3. **Capa de Datos** (`api/`, `services/`)
 - `CoinGeckoApiService`: Llamadas a la API con caché
@@ -208,20 +220,15 @@ MultiRepositoryProvider(
 
 ## 📸 Screenshots
 
-> *Agregar aquí capturas de pantalla de la aplicación*
-
-| Lista | Detalle | Perfil |
-|-------|---------|--------|
-| ![Lista](screenshots/list.png) | ![Detalle](screenshots/detail.png) | ![Perfil](screenshots/profile.png) |
+| Lista | Detalle (1) | Detalle (2) | Perfil |
+| :---: | :---: | :---: | :---: |
+| <img src="screenshots/list.png" width="200"> | <img src="screenshots/detail1.png" width="200"> | <img src="screenshots/detail2.png" width="200"> | <img src="screenshots/profile.png" width="200"> |
 
 ## 🎬 Demo
 
-> *Agregar aquí enlace al video demo (30-60 segundos)*
+
 
 ## 📄 Licencia
 
 Este proyecto fue desarrollado como parte de un reto técnico.
 
----
-
-Desarrollado con ❤️ usando Flutter
