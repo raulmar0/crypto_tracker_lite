@@ -301,7 +301,7 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
               Container(
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1C1C1E),
+                  color: const Color(0xFF2D2D2D),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.grey.shade800, width: 1.0),
                 ),
