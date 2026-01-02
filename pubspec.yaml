@@ -39,7 +39,7 @@ dependencies:
   provider: ^6.1.1
 
   # Red y Datos
-  http: ^1.2.0
+  http: ^1.6.0
   shared_preferences: ^2.2.2
 
   # UI y Gráficos

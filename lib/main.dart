@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:crypto_tracker_lite/logic/crypto_list_cubit.dart';
 import 'package:crypto_tracker_lite/logic/favorites_cubit.dart';
 import 'package:crypto_tracker_lite/pages/home_page.dart';
+import 'package:crypto_tracker_lite/services/coingecko_api_service.dart';
 import 'package:crypto_tracker_lite/services/local_storage_service.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
-// d3s4r00ll4d0 41
-// d3s4r00ll4d0 41
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final localStorage = LocalStorageService();
@@ -21,14 +21,19 @@ class AppState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Aquí inyectaremos las dependencias globales (Api, Cache, etc.)
+    final apiService = CoinGeckoApiService();
+
     return MultiProvider(
       providers: [
         // Inyección de Servicios (Singletons)
         Provider<LocalStorageService>.value(value: localStorage),
+        Provider<CoinGeckoApiService>.value(value: apiService),
         // Inyección de BLoCs
         BlocProvider<FavoritesCubit>(
           create: (context) => FavoritesCubit(localStorage),
+        ),
+        BlocProvider<CryptoListCubit>(
+          create: (context) => CryptoListCubit(apiService),
         ),
       ],
       child: const MyApp(),

@@ -1,4 +1,4 @@
-import 'package:crypto_tracker_lite/data/mock_data.dart';
+import 'package:crypto_tracker_lite/logic/crypto_list_cubit.dart';
 import 'package:crypto_tracker_lite/logic/favorites_cubit.dart';
 import 'package:crypto_tracker_lite/widgets/crypto_list_tile.dart';
 import 'package:flutter/material.dart';
@@ -16,32 +16,44 @@ class FavoritesPage extends StatelessWidget {
         backgroundColor: const Color(0xFF222222),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: BlocBuilder<FavoritesCubit, List<String>>(
-        builder: (context, favoriteIds) {
-          if (favoriteIds.isEmpty) {
-            return const Center(
-              child: Text(
-                'No tienes favoritos aún',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
-              ),
-            );
-          }
+        builder: (context, favoriteSymbols) {
+          return BlocBuilder<CryptoListCubit, CryptoListState>(
+            builder: (context, cryptoState) {
+              if (cryptoState is! CryptoListLoaded) {
+                return const Center(
+                  child: Text(
+                    'Carga los datos primero',
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                  ),
+                );
+              }
 
-          // Filter cryptos based on favorite IDs (symbols)
-          final favoriteCryptos = MockData.cryptos
-              .where((crypto) => favoriteIds.contains(crypto.symbol))
-              .toList();
+              final favoriteCryptos = cryptoState.cryptos
+                  .where((crypto) => favoriteSymbols.contains(crypto.symbol))
+                  .toList();
 
-          return ListView.separated(
-            itemCount: favoriteCryptos.length,
-            separatorBuilder: (context, index) =>
-                const Divider(color: Colors.white10, height: 1),
-            itemBuilder: (context, index) {
-              return CryptoListTile(crypto: favoriteCryptos[index]);
+              if (favoriteCryptos.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No tienes favoritos aún',
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                itemCount: favoriteCryptos.length,
+                separatorBuilder: (context, index) =>
+                    const Divider(color: Colors.white10, height: 1),
+                itemBuilder: (context, index) {
+                  return CryptoListTile(crypto: favoriteCryptos[index]);
+                },
+              );
             },
           );
         },

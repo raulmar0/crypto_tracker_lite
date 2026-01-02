@@ -1,19 +1,52 @@
 import 'package:crypto_tracker_lite/logic/favorites_cubit.dart';
 import 'package:crypto_tracker_lite/models/crypto_model.dart';
+import 'package:crypto_tracker_lite/services/coingecko_api_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-class CoinDetailPage extends StatelessWidget {
+class CoinDetailPage extends StatefulWidget {
   final CryptoModel crypto;
 
   const CoinDetailPage({super.key, required this.crypto});
 
   @override
+  State<CoinDetailPage> createState() => _CoinDetailPageState();
+}
+
+class _CoinDetailPageState extends State<CoinDetailPage> {
+  List<double> _priceHistory = [];
+  bool _isLoadingChart = true;
+  String? _chartError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadChartData();
+  }
+
+  Future<void> _loadChartData() async {
+    try {
+      final apiService = context.read<CoinGeckoApiService>();
+      final history = await apiService.getMarketChart(widget.crypto.id);
+      setState(() {
+        _priceHistory = history;
+        _isLoadingChart = false;
+      });
+    } catch (e) {
+      setState(() {
+        _chartError = 'Error loading chart';
+        _isLoadingChart = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final crypto = widget.crypto;
     final currencyFormatter = NumberFormat.simpleCurrency(decimalDigits: 2);
-    final isPositive = crypto.changePercentage >= 0;
+    final isPositive = crypto.priceChangePercentage24h >= 0;
     final color = isPositive ? Colors.greenAccent : Colors.redAccent;
 
     return Scaffold(
@@ -59,12 +92,19 @@ class CoinDetailPage extends StatelessWidget {
                     height: 60,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.orange, // Placeholder for icon
+                      color: Colors.white10,
                     ),
-                    child: const Icon(
-                      Icons.currency_bitcoin,
-                      color: Colors.white,
-                      size: 40,
+                    child: ClipOval(
+                      child: Image.network(
+                        crypto.image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.currency_bitcoin,
+                              color: Colors.orange,
+                              size: 40,
+                            ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 15),
@@ -101,7 +141,7 @@ class CoinDetailPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    currencyFormatter.format(crypto.price),
+                    currencyFormatter.format(crypto.currentPrice),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 32,
@@ -114,7 +154,7 @@ class CoinDetailPage extends StatelessWidget {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.2), // Use withValues
+                      color: color.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: color.withValues(alpha: 0.5)),
                     ),
@@ -127,7 +167,7 @@ class CoinDetailPage extends StatelessWidget {
                           color: color,
                         ),
                         Text(
-                          '${isPositive ? '+' : ''}${crypto.changePercentage.toStringAsFixed(2)}%',
+                          '${isPositive ? '+' : ''}${crypto.priceChangePercentage24h.toStringAsFixed(2)}%',
                           style: TextStyle(
                             color: color,
                             fontWeight: FontWeight.bold,
@@ -150,13 +190,13 @@ class CoinDetailPage extends StatelessWidget {
                 children: [
                   _buildStatCard(
                     title: 'Máximo 24h',
-                    value: currencyFormatter.format(crypto.max24h),
+                    value: currencyFormatter.format(crypto.high24h),
                     icon: Icons.trending_up,
                     iconColor: Colors.greenAccent,
                   ),
                   _buildStatCard(
                     title: 'Mínimo 24h',
-                    value: currencyFormatter.format(crypto.min24h),
+                    value: currencyFormatter.format(crypto.low24h),
                     icon: Icons.trending_down,
                     iconColor: Colors.redAccent,
                   ),
@@ -170,7 +210,7 @@ class CoinDetailPage extends StatelessWidget {
                   _buildStatCard(
                     title: 'Volumen 24h',
                     value:
-                        '\$${(crypto.volume24h / 1000000).toStringAsFixed(2)}M',
+                        '\$${(crypto.totalVolume / 1000000).toStringAsFixed(2)}M',
                     icon: Icons.compare_arrows,
                     iconColor: Colors.orangeAccent,
                   ),
@@ -207,7 +247,7 @@ class CoinDetailPage extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            currencyFormatter.format(crypto.price),
+                            currencyFormatter.format(crypto.currentPrice),
                             style: TextStyle(
                               color: color,
                               fontWeight: FontWeight.bold,
@@ -217,166 +257,131 @@ class CoinDetailPage extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    SizedBox(
-                      height: 200,
-                      child: LineChart(
-                        LineChartData(
-                          gridData: FlGridData(
-                            show: true,
-                            drawVerticalLine: false,
-                            horizontalInterval: 1000,
-                            getDrawingHorizontalLine: (value) {
-                              return const FlLine(
-                                color: Colors.white10,
-                                strokeWidth: 1,
-                                dashArray: [5, 5],
-                              );
-                            },
-                          ),
-                          titlesData: FlTitlesData(
-                            show: true,
-                            rightTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            topTitles: const AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                                interval: 1,
-                                getTitlesWidget: (value, meta) {
-                                  if (value.toInt() == 0) {
-                                    return const Text(
-                                      'Inicio',
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 12,
-                                      ),
-                                    );
-                                  }
-                                  if (value.toInt() == 6) {
-                                    return const Text(
-                                      'Hoy',
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 12,
-                                      ),
-                                    );
-                                  }
-                                  return const SizedBox.shrink();
-                                },
-                              ),
-                            ),
-                            leftTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 40,
-                                interval:
-                                    (crypto.max24h - crypto.min24h) /
-                                    2, // Approximate interval
-                                getTitlesWidget: (value, meta) {
-                                  // Simplified formatting for Y-axis
-                                  if (value >= 1000) {
-                                    return Text(
-                                      '\$${(value / 1000).toStringAsFixed(1)}K',
-                                      style: const TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 10,
-                                      ),
-                                    );
-                                  }
-                                  return Text(
-                                    value.toStringAsFixed(1),
-                                    style: const TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 10,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          borderData: FlBorderData(show: false),
-                          minX: 0,
-                          maxX: 6,
-                          minY:
-                              crypto.history7d.reduce((a, b) => a < b ? a : b) *
-                              0.98,
-                          maxY:
-                              crypto.history7d.reduce((a, b) => a > b ? a : b) *
-                              1.02,
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: crypto.history7d
-                                  .asMap()
-                                  .entries
-                                  .map(
-                                    (e) => FlSpot(
-                                      e.key.toDouble(),
-                                      e.value.toDouble(),
-                                    ),
-                                  )
-                                  .toList(),
-                              isCurved: true,
-                              color: color,
-                              barWidth: 3,
-                              isStrokeCapRound: true,
-                              dotData: const FlDotData(show: false),
-                              belowBarData: BarAreaData(
-                                show: true,
-                                color: color.withValues(alpha: 0.1),
-                                gradient: LinearGradient(
-                                  colors: [
-                                    color.withValues(alpha: 0.3),
-                                    color.withValues(alpha: 0.0),
-                                  ],
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    SizedBox(height: 200, child: _buildChart(color)),
                   ],
                 ),
               ),
               const SizedBox(height: 30),
-              // About Section
-              if (crypto.description.isNotEmpty) ...[
-                const Text(
-                  'Acerca de',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF2C2C2C),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  child: Text(
-                    crypto.description,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 14,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-              ],
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildChart(Color color) {
+    if (_isLoadingChart) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.yellow),
+      );
+    }
+
+    if (_chartError != null || _priceHistory.isEmpty) {
+      return Center(
+        child: Text(
+          _chartError ?? 'No data available',
+          style: const TextStyle(color: Colors.grey),
+        ),
+      );
+    }
+
+    final minY = _priceHistory.reduce((a, b) => a < b ? a : b) * 0.98;
+    final maxY = _priceHistory.reduce((a, b) => a > b ? a : b) * 1.02;
+
+    return LineChart(
+      LineChartData(
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          horizontalInterval: (maxY - minY) / 4,
+          getDrawingHorizontalLine: (value) {
+            return const FlLine(
+              color: Colors.white10,
+              strokeWidth: 1,
+              dashArray: [5, 5],
+            );
+          },
+        ),
+        titlesData: FlTitlesData(
+          show: true,
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 30,
+              interval: (_priceHistory.length / 6).ceilToDouble(),
+              getTitlesWidget: (value, meta) {
+                if (value.toInt() == 0) {
+                  return const Text(
+                    'Inicio',
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  );
+                }
+                if (value.toInt() == _priceHistory.length - 1) {
+                  return const Text(
+                    'Hoy',
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 50,
+              interval: (maxY - minY) / 3,
+              getTitlesWidget: (value, meta) {
+                if (value >= 1000) {
+                  return Text(
+                    '\$${(value / 1000).toStringAsFixed(1)}K',
+                    style: const TextStyle(color: Colors.grey, fontSize: 10),
+                  );
+                }
+                return Text(
+                  '\$${value.toStringAsFixed(2)}',
+                  style: const TextStyle(color: Colors.grey, fontSize: 10),
+                );
+              },
+            ),
+          ),
+        ),
+        borderData: FlBorderData(show: false),
+        minX: 0,
+        maxX: (_priceHistory.length - 1).toDouble(),
+        minY: minY,
+        maxY: maxY,
+        lineBarsData: [
+          LineChartBarData(
+            spots: _priceHistory
+                .asMap()
+                .entries
+                .map((e) => FlSpot(e.key.toDouble(), e.value))
+                .toList(),
+            isCurved: true,
+            color: color,
+            barWidth: 3,
+            isStrokeCapRound: true,
+            dotData: const FlDotData(show: false),
+            belowBarData: BarAreaData(
+              show: true,
+              gradient: LinearGradient(
+                colors: [
+                  color.withValues(alpha: 0.3),
+                  color.withValues(alpha: 0.0),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -14,7 +14,7 @@ class CryptoListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final currencyFormatter = NumberFormat.simpleCurrency(decimalDigits: 2);
 
-    final isPositive = crypto.changePercentage >= 0;
+    final isPositive = crypto.priceChangePercentage24h >= 0;
     final color = isPositive ? Colors.greenAccent : Colors.redAccent;
 
     return BlocBuilder<FavoritesCubit, List<String>>(
@@ -42,24 +42,29 @@ class CryptoListTile extends StatelessWidget {
                   },
                   child: Row(
                     children: [
-                      // Icono
+                      // Icono from API
                       Container(
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white10, // Placeholder background
+                          color: Colors.white10,
                           border: Border.all(
                             color: iconBorderColor,
                             width: isFavorite ? 2.0 : 0.0,
                           ),
                         ),
-                        // Usamos un Icon por ahora si no hay URL real funcional,
-                        // o podríamos usar Image.network con errorBuilder
-                        child: const Icon(
-                          Icons.currency_bitcoin,
-                          color: Colors.orange,
-                          size: 30,
+                        child: ClipOval(
+                          child: Image.network(
+                            crypto.image,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                                  Icons.currency_bitcoin,
+                                  color: Colors.orange,
+                                  size: 30,
+                                ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -91,7 +96,7 @@ class CryptoListTile extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            currencyFormatter.format(crypto.price),
+                            currencyFormatter.format(crypto.currentPrice),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -99,7 +104,7 @@ class CryptoListTile extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            '${isPositive ? '+' : ''}${crypto.changePercentage.toStringAsFixed(2)}%',
+                            '${isPositive ? '+' : ''}${crypto.priceChangePercentage24h.toStringAsFixed(2)}%',
                             style: TextStyle(fontSize: 14, color: color),
                           ),
                         ],
