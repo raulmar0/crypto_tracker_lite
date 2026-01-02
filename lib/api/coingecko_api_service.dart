@@ -26,9 +26,11 @@ class CoinGeckoApiService {
   final Map<String, _CacheEntry> _cache = {};
 
   /// Fetch list of cryptocurrencies
-  Future<List<Map<String, dynamic>>> getMarkets() async {
-    const cacheKey = 'markets';
-    print('[API] getMarkets() called');
+  Future<List<Map<String, dynamic>>> getMarkets({
+    String currency = 'usd',
+  }) async {
+    final cacheKey = 'markets_$currency';
+    print('[API] getMarkets() called with currency: $currency');
 
     // Check cache
     if (_isCacheValid(cacheKey)) {
@@ -37,7 +39,7 @@ class CoinGeckoApiService {
     }
 
     print('[API] Cache miss, making HTTP request...');
-    final uri = Uri.parse('$_baseUrl/coins/markets?vs_currency=usd');
+    final uri = Uri.parse('$_baseUrl/coins/markets?vs_currency=$currency');
 
     try {
       final response = await http.get(uri);
@@ -60,9 +62,14 @@ class CoinGeckoApiService {
   }
 
   /// Fetch 7-day price chart for a specific coin
-  Future<List<double>> getMarketChart(String coinId) async {
-    final cacheKey = 'chart_$coinId';
-    print('[API] getMarketChart() called with coinId: $coinId');
+  Future<List<double>> getMarketChart(
+    String coinId, {
+    String currency = 'usd',
+  }) async {
+    final cacheKey = 'chart_${coinId}_$currency';
+    print(
+      '[API] getMarketChart() called with coinId: $coinId, currency: $currency',
+    );
 
     // Check cache
     if (_isCacheValid(cacheKey)) {
@@ -71,7 +78,7 @@ class CoinGeckoApiService {
     }
 
     final uri = Uri.parse(
-      '$_baseUrl/coins/$coinId/market_chart?vs_currency=usd&days=7',
+      '$_baseUrl/coins/$coinId/market_chart?vs_currency=$currency&days=7',
     );
     print('[API] Chart URL: $uri');
 
@@ -100,13 +107,13 @@ class CoinGeckoApiService {
     }
   }
 
-  /// Fetch coin details including description
-  Future<String> getCoinDescription(String coinId) async {
+  /// Fetch coin details including description map
+  Future<Map<String, dynamic>> getCoinDescription(String coinId) async {
     final cacheKey = 'description_$coinId';
 
     // Check cache
     if (_isCacheValid(cacheKey)) {
-      return _cache[cacheKey]!.data as String;
+      return _cache[cacheKey]!.data as Map<String, dynamic>;
     }
 
     final uri = Uri.parse('$_baseUrl/coins/$coinId');
@@ -115,13 +122,14 @@ class CoinGeckoApiService {
     _handleErrors(response);
 
     final Map<String, dynamic> data = json.decode(response.body);
-    final description =
-        data['description']?['en'] as String? ?? 'No description available.';
+    final Map<String, dynamic> descriptionMap = data['description'] != null
+        ? Map<String, dynamic>.from(data['description'])
+        : {};
 
     // Store in cache
-    _cache[cacheKey] = _CacheEntry(description, DateTime.now());
+    _cache[cacheKey] = _CacheEntry(descriptionMap, DateTime.now());
 
-    return description;
+    return descriptionMap;
   }
 
   bool _isCacheValid(String key) {

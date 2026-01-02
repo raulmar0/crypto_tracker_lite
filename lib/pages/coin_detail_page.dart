@@ -1,3 +1,4 @@
+import 'package:crypto_tracker_lite/l10n/app_localizations.dart';
 import 'package:crypto_tracker_lite/logic/favorites_bloc.dart';
 import 'package:crypto_tracker_lite/models/crypto_model.dart';
 import 'package:crypto_tracker_lite/api/coingecko_api_service.dart';
@@ -22,7 +23,7 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
   String? _chartError;
   bool _isRateLimited = false;
 
-  String _description = '';
+  Map<String, dynamic> _descriptionMap = {};
   bool _isLoadingDescription = true;
 
   @override
@@ -36,43 +37,55 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
     try {
       final apiService = context.read<CoinGeckoApiService>();
       final history = await apiService.getMarketChart(widget.crypto.id);
-      setState(() {
-        _priceHistory = history;
-        _isLoadingChart = false;
-      });
+      if (mounted) {
+        setState(() {
+          _priceHistory = history;
+          _isLoadingChart = false;
+        });
+      }
     } on RateLimitException {
-      setState(() {
-        _chartError = 'Rate limit exceeded';
-        _isLoadingChart = false;
-        _isRateLimited = true;
-      });
+      if (mounted) {
+        setState(() {
+          _chartError = 'rateLimitTitle';
+          _isLoadingChart = false;
+          _isRateLimited = true;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _chartError = 'Error loading chart';
-        _isLoadingChart = false;
-      });
+      if (mounted) {
+        setState(() {
+          _chartError = 'errorLoadingChart';
+          _isLoadingChart = false;
+        });
+      }
     }
   }
 
   Future<void> _loadDescription() async {
     try {
       final apiService = context.read<CoinGeckoApiService>();
-      final description = await apiService.getCoinDescription(widget.crypto.id);
-      setState(() {
-        _description = description;
-        _isLoadingDescription = false;
-      });
+      final descriptionMap = await apiService.getCoinDescription(
+        widget.crypto.id,
+      );
+      if (mounted) {
+        setState(() {
+          _descriptionMap = descriptionMap;
+          _isLoadingDescription = false;
+        });
+      }
     } on RateLimitException {
-      setState(() {
-        _description = 'Error loading description';
-        _isLoadingDescription = false;
-        _isRateLimited = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingDescription = false;
+          _isRateLimited = true;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _description = 'Error loading description';
-        _isLoadingDescription = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingDescription = false;
+        });
+      }
     }
   }
 
@@ -82,12 +95,37 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
     });
   }
 
+  String _getLocalizedDescription(AppLocalizations l10n) {
+    if (_descriptionMap.isEmpty) {
+      return _isLoadingDescription ? '' : l10n.noDescriptionAvailable;
+    }
+
+    final localeCode = Localizations.localeOf(context).languageCode;
+
+    // 1. Try current locale
+    if (_descriptionMap.containsKey(localeCode) &&
+        _descriptionMap[localeCode].toString().trim().isNotEmpty) {
+      return _descriptionMap[localeCode].toString();
+    }
+
+    // 2. Fallback to English
+    if (_descriptionMap.containsKey('en') &&
+        _descriptionMap['en'].toString().trim().isNotEmpty) {
+      return _descriptionMap['en'].toString();
+    }
+
+    // 3. Last fallback
+    return l10n.noDescriptionAvailable;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final crypto = widget.crypto;
     // Use more decimals for small prices
     final int decimals = crypto.currentPrice < 1 ? 6 : 2;
-    final currencyFormatter = NumberFormat.simpleCurrency(
+    final currencyFormatter = NumberFormat.currency(
+      symbol: 'US\$',
       decimalDigits: decimals,
     );
     final isPositive = crypto.priceChangePercentage24h >= 0;
@@ -96,7 +134,7 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
-        title: const Text('Detalle'),
+        title: Text(l10n.detail),
         centerTitle: true,
         backgroundColor: const Color(0xFF222222),
         elevation: 0,
@@ -128,8 +166,8 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
           // Error banner for rate limit
           if (_isRateLimited)
             ErrorBanner(
-              title: 'Límite de solicitudes excedido.',
-              subtitle: 'Algunos datos pueden no estar disponibles.',
+              title: l10n.rateLimitTitle,
+              subtitle: l10n.rateLimitDataUnavailable,
               onDismiss: _dismissRateLimitBanner,
             ),
           // Main scrollable content
@@ -189,9 +227,9 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
                     ),
                     const SizedBox(height: 30),
                     // Price Section
-                    const Text(
-                      'Precio actual',
-                      style: TextStyle(color: Colors.grey, fontSize: 16),
+                    Text(
+                      l10n.currentPrice,
+                      style: const TextStyle(color: Colors.grey, fontSize: 16),
                     ),
                     const SizedBox(height: 5),
                     Row(
@@ -248,28 +286,28 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
                       childAspectRatio: 1.6,
                       children: [
                         _buildStatCard(
-                          title: 'Máximo 24h',
+                          title: l10n.high24h,
                           value: currencyFormatter.format(crypto.high24h),
                           icon: Icons.trending_up,
                           iconColor: Colors.greenAccent,
                         ),
                         _buildStatCard(
-                          title: 'Mínimo 24h',
+                          title: l10n.low24h,
                           value: currencyFormatter.format(crypto.low24h),
                           icon: Icons.trending_down,
                           iconColor: Colors.redAccent,
                         ),
                         _buildStatCard(
-                          title: 'Capitalización',
+                          title: l10n.marketCap,
                           value:
-                              '\$${(crypto.marketCap / 1000000000).toStringAsFixed(2)}B',
+                              'US\$${(crypto.marketCap / 1000000000).toStringAsFixed(2)}B',
                           icon: Icons.account_balance_wallet,
                           iconColor: Colors.blueAccent,
                         ),
                         _buildStatCard(
-                          title: 'Volumen 24h',
+                          title: l10n.volume24h,
                           value:
-                              '\$${(crypto.totalVolume / 1000000).toStringAsFixed(2)}M',
+                              'US\$${(crypto.totalVolume / 1000000).toStringAsFixed(2)}M',
                           icon: Icons.compare_arrows,
                           iconColor: Colors.orangeAccent,
                         ),
@@ -289,9 +327,9 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Precio histórico (7 días)',
-                                style: TextStyle(
+                              Text(
+                                l10n.priceHistory7d,
+                                style: const TextStyle(
                                   color: Colors.grey,
                                   fontSize: 16,
                                 ),
@@ -319,15 +357,18 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
                             ],
                           ),
                           const SizedBox(height: 20),
-                          SizedBox(height: 200, child: _buildChart(color)),
+                          SizedBox(
+                            height: 200,
+                            child: _buildChart(color, l10n),
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 30),
                     // Acerca de Section
-                    const Text(
-                      'Acerca de',
-                      style: TextStyle(
+                    Text(
+                      l10n.about,
+                      style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -359,9 +400,7 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
                               ),
                             )
                           : Text(
-                              _description.isNotEmpty
-                                  ? _description
-                                  : 'No hay descripción disponible.',
+                              _getLocalizedDescription(l10n),
                               style: TextStyle(
                                 color: Colors.grey.shade400,
                                 fontSize: 15,
@@ -380,7 +419,7 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
     );
   }
 
-  Widget _buildChart(Color color) {
+  Widget _buildChart(Color color, AppLocalizations l10n) {
     if (_isLoadingChart) {
       return const Center(
         child: CircularProgressIndicator(color: Colors.yellow),
@@ -388,11 +427,15 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
     }
 
     if (_chartError != null || _priceHistory.isEmpty) {
+      String errorMessage = l10n.noDataAvailable;
+      if (_chartError == 'rateLimitTitle') {
+        errorMessage = l10n.rateLimitTitle;
+      } else if (_chartError == 'errorLoadingChart') {
+        errorMessage = l10n.errorLoadingChart;
+      }
+
       return Center(
-        child: Text(
-          _chartError ?? 'No data available',
-          style: const TextStyle(color: Colors.grey),
-        ),
+        child: Text(errorMessage, style: const TextStyle(color: Colors.grey)),
       );
     }
 
@@ -437,15 +480,15 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
               interval: (_priceHistory.length / 6).ceilToDouble(),
               getTitlesWidget: (value, meta) {
                 if (value.toInt() == 0) {
-                  return const Text(
-                    'Inicio',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  return Text(
+                    l10n.chartStart,
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
                   );
                 }
                 if (value.toInt() == _priceHistory.length - 1) {
-                  return const Text(
-                    'Hoy',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  return Text(
+                    l10n.chartToday,
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
                   );
                 }
                 return const SizedBox.shrink();
@@ -460,14 +503,14 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
               getTitlesWidget: (value, meta) {
                 if (value >= 1000) {
                   return Text(
-                    '\$${(value / 1000).toStringAsFixed(1)}K',
+                    'US\$${(value / 1000).toStringAsFixed(1)}K',
                     style: const TextStyle(color: Colors.grey, fontSize: 10),
                   );
                 }
                 // For values under 1, show more decimals
                 final int chartDecimals = value < 1 ? 6 : 2;
                 return Text(
-                  '\$${value.toStringAsFixed(chartDecimals)}',
+                  'US\$${value.toStringAsFixed(chartDecimals)}',
                   style: const TextStyle(color: Colors.grey, fontSize: 10),
                 );
               },
@@ -529,9 +572,12 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
             children: [
               Icon(icon, color: iconColor, size: 20),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(color: Colors.grey, fontSize: 14),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),

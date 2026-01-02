@@ -14,7 +14,8 @@ class CryptoListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     // Use more decimals for small prices (stablecoins, small tokens)
     final int decimals = crypto.currentPrice < 1 ? 6 : 2;
-    final currencyFormatter = NumberFormat.simpleCurrency(
+    final currencyFormatter = NumberFormat.currency(
+      symbol: 'US\$',
       decimalDigits: decimals,
     );
 

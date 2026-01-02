@@ -1,3 +1,4 @@
+import 'package:crypto_tracker_lite/l10n/app_localizations.dart';
 import 'package:crypto_tracker_lite/logic/crypto_list_bloc.dart';
 import 'package:crypto_tracker_lite/logic/favorites_bloc.dart';
 import 'package:crypto_tracker_lite/widgets/crypto_list_tile.dart';
@@ -9,9 +10,10 @@ class FavoritesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favoritos'),
+        title: Text(l10n.favorites),
         centerTitle: true,
         backgroundColor: const Color(0xFF222222),
         elevation: 0,
@@ -25,10 +27,10 @@ class FavoritesPage extends StatelessWidget {
           return BlocBuilder<CryptoListBloc, CryptoListState>(
             builder: (context, cryptoState) {
               if (cryptoState is! CryptoListLoaded) {
-                return const Center(
+                return Center(
                   child: Text(
-                    'Carga los datos primero',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                    l10n.loadDataFirst,
+                    style: const TextStyle(color: Colors.grey, fontSize: 16),
                   ),
                 );
               }
@@ -41,10 +43,10 @@ class FavoritesPage extends StatelessWidget {
                   .toList();
 
               if (favoriteCryptos.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
-                    'No tienes favoritos aún',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                    l10n.noFavoritesYet,
+                    style: const TextStyle(color: Colors.grey, fontSize: 16),
                   ),
                 );
               }

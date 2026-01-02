@@ -1,3 +1,4 @@
+import 'package:crypto_tracker_lite/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class ErrorPage extends StatelessWidget {
@@ -7,6 +8,7 @@ class ErrorPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: const Color(0xFF1A1A1A),
       padding: const EdgeInsets.all(30.0),
@@ -34,9 +36,9 @@ class ErrorPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 30),
-            const Text(
-              'Hubo un problema 😢',
-              style: TextStyle(
+            Text(
+              l10n.errorTitle,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -44,9 +46,13 @@ class ErrorPage extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 15),
-            const Text(
-              'La API de CoinGecko tiene límites de velocidad. Por favor, espera unos momentos y presiona "Reintentar".',
-              style: TextStyle(color: Colors.grey, fontSize: 16, height: 1.5),
+            Text(
+              l10n.errorMessage,
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 16,
+                height: 1.5,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
@@ -63,9 +69,9 @@ class ErrorPage extends StatelessWidget {
                   }
                 },
                 icon: const Icon(Icons.refresh, color: Colors.white),
-                label: const Text(
-                  'Reintentar',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                label: Text(
+                  l10n.retry,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2C2C2C),

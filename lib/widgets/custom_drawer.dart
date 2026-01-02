@@ -1,5 +1,7 @@
+import 'package:crypto_tracker_lite/l10n/app_localizations.dart';
 import 'package:crypto_tracker_lite/pages/favorites_page.dart';
 import 'package:crypto_tracker_lite/pages/profile_page.dart';
+import 'package:crypto_tracker_lite/pages/settings_page.dart';
 import 'package:flutter/material.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -7,12 +9,10 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Drawer(
-      backgroundColor: const Color(
-        0xFF1E1E1E,
-      ), // Slightly lighter than scaffold for contrast
+      backgroundColor: const Color(0xFF1E1E1E),
       child: SafeArea(
-        // Ensure content is not hidden by notches/status bars
         child: Column(
           children: [
             Container(
@@ -51,7 +51,7 @@ class CustomDrawer extends StatelessWidget {
                             image: const DecorationImage(
                               image: NetworkImage(
                                 'https://i.pravatar.cc/300?img=11',
-                              ), // Placeholder image
+                              ),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -87,7 +87,7 @@ class CustomDrawer extends StatelessWidget {
                     icon: Icons.star,
                     iconColor: Colors.yellow,
                     iconBgColor: Colors.yellow.withValues(alpha: 0.2),
-                    title: 'Favoritos',
+                    title: l10n.favorites,
                     onTap: () {
                       Navigator.pop(context); // Close drawer
                       Navigator.push(
@@ -103,7 +103,7 @@ class CustomDrawer extends StatelessWidget {
                     icon: Icons.person,
                     iconColor: Colors.blue,
                     iconBgColor: Colors.blue.withValues(alpha: 0.2),
-                    title: 'Perfil',
+                    title: l10n.profile,
                     onTap: () {
                       Navigator.pop(context); // Close drawer
                       Navigator.push(
@@ -119,8 +119,16 @@ class CustomDrawer extends StatelessWidget {
                     icon: Icons.settings,
                     iconColor: Colors.grey,
                     iconBgColor: Colors.grey.withValues(alpha: 0.2),
-                    title: 'Configuración',
-                    onTap: () {},
+                    title: l10n.settings,
+                    onTap: () {
+                      Navigator.pop(context); // Close drawer
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SettingsPage(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -140,7 +148,7 @@ class CustomDrawer extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2C), // Lighter background for items
+        color: const Color(0xFF2C2C2C),
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: iconColor.withValues(alpha: 0.5)),
       ),

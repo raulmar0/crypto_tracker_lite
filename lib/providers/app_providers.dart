@@ -1,6 +1,7 @@
 import 'package:crypto_tracker_lite/api/coingecko_api_service.dart';
 import 'package:crypto_tracker_lite/logic/crypto_list_bloc.dart';
 import 'package:crypto_tracker_lite/logic/favorites_bloc.dart';
+import 'package:crypto_tracker_lite/logic/settings_bloc.dart';
 import 'package:crypto_tracker_lite/services/local_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,6 +31,10 @@ class AppProviders extends StatelessWidget {
         providers: [
           BlocProvider<FavoritesBloc>(
             create: (context) => FavoritesBloc(localStorage),
+          ),
+          BlocProvider<SettingsBloc>(
+            create: (context) =>
+                SettingsBloc(localStorage)..add(LoadSettings()),
           ),
           BlocProvider<CryptoListBloc>(
             create: (context) => CryptoListBloc(apiService),

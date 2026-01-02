@@ -1,3 +1,4 @@
+import 'package:crypto_tracker_lite/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -5,10 +6,11 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
-        title: const Text('Mi perfil'),
+        title: Text(l10n.myProfile),
         centerTitle: true,
         backgroundColor: const Color(0xFF222222),
         elevation: 0,
@@ -29,11 +31,7 @@ class ProfilePage extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(top: 30, bottom: 40),
-              decoration: const BoxDecoration(
-                // Using a slightly different shade or just let it depend on the design image which seemed to have a top section
-                // If the user wants a background "dividing the section", likely a different color or just the top part
-                color: Color(0xFF222222),
-              ),
+              decoration: const BoxDecoration(color: Color(0xFF222222)),
               child: Column(
                 children: [
                   // Avatar with Glow
@@ -66,7 +64,7 @@ class ProfilePage extends StatelessWidget {
                             image: const DecorationImage(
                               image: NetworkImage(
                                 'https://i.pravatar.cc/300?img=11',
-                              ), // Placeholder image
+                              ),
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -108,7 +106,7 @@ class ProfilePage extends StatelessWidget {
                       icon: Icons.person_outline,
                       iconColor: Colors.blue,
                       iconBgColor: Colors.blue.withValues(alpha: 0.1),
-                      label: 'Nombre',
+                      label: l10n.name,
                       value: 'Bryan Vazquez',
                     ),
                     Padding(
@@ -122,7 +120,7 @@ class ProfilePage extends StatelessWidget {
                       icon: Icons.email_outlined,
                       iconColor: Colors.orange,
                       iconBgColor: Colors.orange.withValues(alpha: 0.1),
-                      label: 'Correo',
+                      label: l10n.email,
                       value: 'bryan@correo.com',
                     ),
                   ],

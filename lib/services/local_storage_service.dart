@@ -19,4 +19,26 @@ class LocalStorageService {
   Future<void> saveFavorites(List<String> favorites) async {
     await _prefs.setStringList(_favoritesKey, favorites);
   }
+
+  // Locale
+  static const String _localeKey = 'app_locale';
+
+  String? getLocale() {
+    return _prefs.getString(_localeKey);
+  }
+
+  Future<void> saveLocale(String code) async {
+    await _prefs.setString(_localeKey, code);
+  }
+
+  // Currency
+  static const String _currencyKey = 'app_currency';
+
+  String getCurrency() {
+    return _prefs.getString(_currencyKey) ?? 'usd';
+  }
+
+  Future<void> saveCurrency(String code) async {
+    await _prefs.setString(_currencyKey, code);
+  }
 }
