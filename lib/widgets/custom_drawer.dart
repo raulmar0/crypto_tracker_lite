@@ -50,7 +50,7 @@ class CustomDrawer extends StatelessWidget {
                             border: Border.all(color: Colors.yellow, width: 2),
                             image: const DecorationImage(
                               image: NetworkImage(
-                                'https://i.pravatar.cc/300?img=11',
+                                'https://file.garden/aFtVBHPeqRQlrwL-/isaac-perfil.jpg',
                               ),
                               fit: BoxFit.cover,
                             ),
@@ -61,7 +61,7 @@ class CustomDrawer extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'Bryan Vazquez',
+                    'Isaac del Toro',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -69,9 +69,16 @@ class CustomDrawer extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  const Text(
-                    'bryan@correo.com',
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.mail_outline, color: Colors.grey, size: 16),
+                      SizedBox(width: 8),
+                      Text(
+                        'isaac@correo.com',
+                        style: TextStyle(color: Colors.grey, fontSize: 14),
+                      ),
+                    ],
                   ),
                 ],
               ),

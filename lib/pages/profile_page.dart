@@ -63,7 +63,7 @@ class ProfilePage extends StatelessWidget {
                             border: Border.all(color: Colors.yellow, width: 3),
                             image: const DecorationImage(
                               image: NetworkImage(
-                                'https://i.pravatar.cc/300?img=11',
+                                'https://file.garden/aFtVBHPeqRQlrwL-/isaac-perfil.jpg',
                               ),
                               fit: BoxFit.cover,
                             ),
@@ -74,7 +74,7 @@ class ProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   const Text(
-                    'Bryan Vazquez',
+                    'Isaac del Toro',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -82,9 +82,16 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  const Text(
-                    'bryan@correo.com',
-                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.mail_outline, color: Colors.grey, size: 18),
+                      SizedBox(width: 8),
+                      Text(
+                        'isaac@correo.com',
+                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -107,7 +114,7 @@ class ProfilePage extends StatelessWidget {
                       iconColor: Colors.blue,
                       iconBgColor: Colors.blue.withValues(alpha: 0.1),
                       label: l10n.name,
-                      value: 'Bryan Vazquez',
+                      value: 'Isaac del Toro',
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 15),
@@ -121,7 +128,7 @@ class ProfilePage extends StatelessWidget {
                       iconColor: Colors.orange,
                       iconBgColor: Colors.orange.withValues(alpha: 0.1),
                       label: l10n.email,
-                      value: 'bryan@correo.com',
+                      value: 'isaac@correo.com',
                     ),
                   ],
                 ),

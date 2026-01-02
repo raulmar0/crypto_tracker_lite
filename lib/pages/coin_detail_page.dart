@@ -125,7 +125,7 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
     // Use more decimals for small prices
     final int decimals = crypto.currentPrice < 1 ? 6 : 2;
     final currencyFormatter = NumberFormat.currency(
-      symbol: 'US\$',
+      symbol: '',
       decimalDigits: decimals,
     );
     final isPositive = crypto.priceChangePercentage24h >= 0;
@@ -236,7 +236,7 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          currencyFormatter.format(crypto.currentPrice),
+                          '${currencyFormatter.format(crypto.currentPrice)} US\$',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 32,
@@ -287,27 +287,29 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
                       children: [
                         _buildStatCard(
                           title: l10n.high24h,
-                          value: currencyFormatter.format(crypto.high24h),
+                          value:
+                              '${currencyFormatter.format(crypto.high24h)} US\$',
                           icon: Icons.trending_up,
                           iconColor: Colors.greenAccent,
                         ),
                         _buildStatCard(
                           title: l10n.low24h,
-                          value: currencyFormatter.format(crypto.low24h),
+                          value:
+                              '${currencyFormatter.format(crypto.low24h)} US\$',
                           icon: Icons.trending_down,
                           iconColor: Colors.redAccent,
                         ),
                         _buildStatCard(
                           title: l10n.marketCap,
                           value:
-                              'US\$${(crypto.marketCap / 1000000000).toStringAsFixed(2)}B',
+                              '${(crypto.marketCap / 1000000000).toStringAsFixed(2)}B US\$',
                           icon: Icons.account_balance_wallet,
                           iconColor: Colors.blueAccent,
                         ),
                         _buildStatCard(
                           title: l10n.volume24h,
                           value:
-                              'US\$${(crypto.totalVolume / 1000000).toStringAsFixed(2)}M',
+                              '${(crypto.totalVolume / 1000000).toStringAsFixed(2)}M US\$',
                           icon: Icons.compare_arrows,
                           iconColor: Colors.orangeAccent,
                         ),
@@ -347,7 +349,7 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
                                   ),
                                 ),
                                 child: Text(
-                                  currencyFormatter.format(crypto.currentPrice),
+                                  '${currencyFormatter.format(crypto.currentPrice)} US\$',
                                   style: TextStyle(
                                     color: color,
                                     fontWeight: FontWeight.bold,
@@ -503,14 +505,14 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
               getTitlesWidget: (value, meta) {
                 if (value >= 1000) {
                   return Text(
-                    'US\$${(value / 1000).toStringAsFixed(1)}K',
+                    '${(value / 1000).toStringAsFixed(1)}K US\$',
                     style: const TextStyle(color: Colors.grey, fontSize: 10),
                   );
                 }
                 // For values under 1, show more decimals
                 final int chartDecimals = value < 1 ? 6 : 2;
                 return Text(
-                  'US\$${value.toStringAsFixed(chartDecimals)}',
+                  '${value.toStringAsFixed(chartDecimals)} US\$',
                   style: const TextStyle(color: Colors.grey, fontSize: 10),
                 );
               },

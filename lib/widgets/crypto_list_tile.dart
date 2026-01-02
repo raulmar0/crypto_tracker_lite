@@ -15,7 +15,7 @@ class CryptoListTile extends StatelessWidget {
     // Use more decimals for small prices (stablecoins, small tokens)
     final int decimals = crypto.currentPrice < 1 ? 6 : 2;
     final currencyFormatter = NumberFormat.currency(
-      symbol: 'US\$',
+      symbol: '',
       decimalDigits: decimals,
     );
 
@@ -101,7 +101,7 @@ class CryptoListTile extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            currencyFormatter.format(crypto.currentPrice),
+                            '${currencyFormatter.format(crypto.currentPrice)} US\$',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
