@@ -1,4 +1,5 @@
 import 'package:crypto_tracker_lite/pages/favorites_page.dart';
+import 'package:crypto_tracker_lite/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 
 class CustomDrawer extends StatelessWidget {
@@ -95,7 +96,15 @@ class CustomDrawer extends StatelessWidget {
                     iconColor: Colors.blue,
                     iconBgColor: Colors.blue.withValues(alpha: 0.2),
                     title: 'Perfil',
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pop(context); // Close drawer
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProfilePage(),
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 15),
                   _buildMenuItem(

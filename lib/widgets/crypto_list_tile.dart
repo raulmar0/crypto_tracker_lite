@@ -1,5 +1,6 @@
 import 'package:crypto_tracker_lite/logic/favorites_cubit.dart';
 import 'package:crypto_tracker_lite/models/crypto_model.dart';
+import 'package:crypto_tracker_lite/pages/coin_detail_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -27,64 +28,85 @@ class CryptoListTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
           child: Row(
             children: [
-              // Icono
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white10, // Placeholder background
-                  border: Border.all(
-                    color: iconBorderColor,
-                    width: isFavorite ? 2.0 : 0.0,
-                  ),
-                ),
-                // Usamos un Icon por ahora si no hay URL real funcional,
-                // o podríamos usar Image.network con errorBuilder
-                child: const Icon(
-                  Icons.currency_bitcoin,
-                  color: Colors.orange,
-                  size: 30,
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Nombre y Símbolo
+              // Clickable Area for Detail Navigation
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      crypto.name,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CoinDetailPage(crypto: crypto),
                       ),
-                    ),
-                    Text(
-                      crypto.symbol,
-                      style: TextStyle(fontSize: 14, color: subTextColor),
-                    ),
-                  ],
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      // Icono
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white10, // Placeholder background
+                          border: Border.all(
+                            color: iconBorderColor,
+                            width: isFavorite ? 2.0 : 0.0,
+                          ),
+                        ),
+                        // Usamos un Icon por ahora si no hay URL real funcional,
+                        // o podríamos usar Image.network con errorBuilder
+                        child: const Icon(
+                          Icons.currency_bitcoin,
+                          color: Colors.orange,
+                          size: 30,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Nombre y Símbolo
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              crypto.name,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                              ),
+                            ),
+                            Text(
+                              crypto.symbol,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: subTextColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Precio y Porcentaje
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            currencyFormatter.format(crypto.price),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
+                          ),
+                          Text(
+                            '${isPositive ? '+' : ''}${crypto.changePercentage.toStringAsFixed(2)}%',
+                            style: TextStyle(fontSize: 14, color: color),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              // Precio y Porcentaje
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    currencyFormatter.format(crypto.price),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                    ),
-                  ),
-                  Text(
-                    '${isPositive ? '+' : ''}${crypto.changePercentage.toStringAsFixed(2)}%',
-                    style: TextStyle(fontSize: 14, color: color),
-                  ),
-                ],
               ),
               const SizedBox(width: 16),
               // Estrella Favorito
