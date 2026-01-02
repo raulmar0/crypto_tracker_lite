@@ -78,6 +78,30 @@ class CoinGeckoApiService {
     return priceHistory;
   }
 
+  /// Fetch coin details including description
+  Future<String> getCoinDescription(String coinId) async {
+    final cacheKey = 'description_$coinId';
+
+    // Check cache
+    if (_isCacheValid(cacheKey)) {
+      return _cache[cacheKey]!.data as String;
+    }
+
+    final uri = Uri.parse('$_baseUrl/coins/$coinId');
+    final response = await http.get(uri);
+
+    _handleErrors(response);
+
+    final Map<String, dynamic> data = json.decode(response.body);
+    final description =
+        data['description']?['en'] as String? ?? 'No description available.';
+
+    // Store in cache
+    _cache[cacheKey] = _CacheEntry(description, DateTime.now());
+
+    return description;
+  }
+
   bool _isCacheValid(String key) {
     final entry = _cache[key];
     if (entry == null) return false;

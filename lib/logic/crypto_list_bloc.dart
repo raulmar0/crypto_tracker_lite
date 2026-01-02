@@ -1,5 +1,5 @@
+import 'package:crypto_tracker_lite/api/coingecko_api_service.dart';
 import 'package:crypto_tracker_lite/models/crypto_model.dart';
-import 'package:crypto_tracker_lite/services/coingecko_api_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

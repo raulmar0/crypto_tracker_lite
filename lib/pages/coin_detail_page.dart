@@ -1,6 +1,6 @@
 import 'package:crypto_tracker_lite/logic/favorites_bloc.dart';
 import 'package:crypto_tracker_lite/models/crypto_model.dart';
-import 'package:crypto_tracker_lite/services/coingecko_api_service.dart';
+import 'package:crypto_tracker_lite/api/coingecko_api_service.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,10 +20,14 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
   bool _isLoadingChart = true;
   String? _chartError;
 
+  String _description = '';
+  bool _isLoadingDescription = true;
+
   @override
   void initState() {
     super.initState();
     _loadChartData();
+    _loadDescription();
   }
 
   Future<void> _loadChartData() async {
@@ -38,6 +42,22 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
       setState(() {
         _chartError = 'Error loading chart';
         _isLoadingChart = false;
+      });
+    }
+  }
+
+  Future<void> _loadDescription() async {
+    try {
+      final apiService = context.read<CoinGeckoApiService>();
+      final description = await apiService.getCoinDescription(widget.crypto.id);
+      setState(() {
+        _description = description;
+        _isLoadingDescription = false;
+      });
+    } catch (e) {
+      setState(() {
+        _description = 'Error loading description';
+        _isLoadingDescription = false;
       });
     }
   }
@@ -266,6 +286,49 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
                     SizedBox(height: 200, child: _buildChart(color)),
                   ],
                 ),
+              ),
+              const SizedBox(height: 30),
+              // Acerca de Section
+              const Text(
+                'Acerca de',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1C1C1E),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade800, width: 1.0),
+                ),
+                child: _isLoadingDescription
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.yellow,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Text(
+                        _description.isNotEmpty
+                            ? _description
+                            : 'No hay descripción disponible.',
+                        style: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontSize: 15,
+                          height: 1.5,
+                        ),
+                      ),
               ),
               const SizedBox(height: 30),
             ],
