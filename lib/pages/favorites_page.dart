@@ -1,5 +1,5 @@
-import 'package:crypto_tracker_lite/logic/crypto_list_cubit.dart';
-import 'package:crypto_tracker_lite/logic/favorites_cubit.dart';
+import 'package:crypto_tracker_lite/logic/crypto_list_bloc.dart';
+import 'package:crypto_tracker_lite/logic/favorites_bloc.dart';
 import 'package:crypto_tracker_lite/widgets/crypto_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,9 +20,9 @@ class FavoritesPage extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: BlocBuilder<FavoritesCubit, List<String>>(
-        builder: (context, favoriteSymbols) {
-          return BlocBuilder<CryptoListCubit, CryptoListState>(
+      body: BlocBuilder<FavoritesBloc, FavoritesState>(
+        builder: (context, favoritesState) {
+          return BlocBuilder<CryptoListBloc, CryptoListState>(
             builder: (context, cryptoState) {
               if (cryptoState is! CryptoListLoaded) {
                 return const Center(
@@ -34,7 +34,10 @@ class FavoritesPage extends StatelessWidget {
               }
 
               final favoriteCryptos = cryptoState.cryptos
-                  .where((crypto) => favoriteSymbols.contains(crypto.symbol))
+                  .where(
+                    (crypto) =>
+                        favoritesState.favorites.contains(crypto.symbol),
+                  )
                   .toList();
 
               if (favoriteCryptos.isEmpty) {

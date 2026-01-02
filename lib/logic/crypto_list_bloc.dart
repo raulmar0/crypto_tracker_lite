@@ -3,6 +3,18 @@ import 'package:crypto_tracker_lite/services/coingecko_api_service.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// Events
+abstract class CryptoListEvent extends Equatable {
+  const CryptoListEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class LoadCryptos extends CryptoListEvent {}
+
+class RetryCryptos extends CryptoListEvent {}
+
 // States
 abstract class CryptoListState extends Equatable {
   const CryptoListState();
@@ -34,13 +46,19 @@ class CryptoListError extends CryptoListState {
   List<Object?> get props => [message, isRateLimited];
 }
 
-// Cubit
-class CryptoListCubit extends Cubit<CryptoListState> {
+// Bloc
+class CryptoListBloc extends Bloc<CryptoListEvent, CryptoListState> {
   final CoinGeckoApiService apiService;
 
-  CryptoListCubit(this.apiService) : super(CryptoListInitial());
+  CryptoListBloc(this.apiService) : super(CryptoListInitial()) {
+    on<LoadCryptos>(_onLoadCryptos);
+    on<RetryCryptos>(_onRetryCryptos);
+  }
 
-  Future<void> loadCryptos() async {
+  Future<void> _onLoadCryptos(
+    LoadCryptos event,
+    Emitter<CryptoListState> emit,
+  ) async {
     emit(CryptoListLoading());
 
     try {
@@ -58,8 +76,11 @@ class CryptoListCubit extends Cubit<CryptoListState> {
     }
   }
 
-  Future<void> retry() async {
+  Future<void> _onRetryCryptos(
+    RetryCryptos event,
+    Emitter<CryptoListState> emit,
+  ) async {
     apiService.clearCache();
-    await loadCryptos();
+    await _onLoadCryptos(LoadCryptos(), emit);
   }
 }

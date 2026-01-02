@@ -1,4 +1,4 @@
-import 'package:crypto_tracker_lite/logic/crypto_list_cubit.dart';
+import 'package:crypto_tracker_lite/logic/crypto_list_bloc.dart';
 import 'package:crypto_tracker_lite/pages/error_page.dart';
 import 'package:crypto_tracker_lite/widgets/crypto_list_tile.dart';
 import 'package:crypto_tracker_lite/widgets/custom_drawer.dart';
@@ -17,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     // Load cryptos on startup
-    context.read<CryptoListCubit>().loadCryptos();
+    context.read<CryptoListBloc>().add(LoadCryptos());
   }
 
   @override
@@ -33,12 +33,12 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              context.read<CryptoListCubit>().retry();
+              context.read<CryptoListBloc>().add(RetryCryptos());
             },
           ),
         ],
       ),
-      body: BlocBuilder<CryptoListCubit, CryptoListState>(
+      body: BlocBuilder<CryptoListBloc, CryptoListState>(
         builder: (context, state) {
           if (state is CryptoListLoading || state is CryptoListInitial) {
             return const Center(
@@ -49,14 +49,16 @@ class _HomePageState extends State<HomePage> {
           if (state is CryptoListError) {
             return ErrorPage(
               onRetry: () {
-                context.read<CryptoListCubit>().retry();
+                context.read<CryptoListBloc>().add(RetryCryptos());
               },
             );
           }
 
           if (state is CryptoListLoaded) {
             return RefreshIndicator(
-              onRefresh: () => context.read<CryptoListCubit>().retry(),
+              onRefresh: () async {
+                context.read<CryptoListBloc>().add(RetryCryptos());
+              },
               color: Colors.yellow,
               child: ListView.separated(
                 itemCount: state.cryptos.length,

@@ -1,4 +1,4 @@
-import 'package:crypto_tracker_lite/logic/favorites_cubit.dart';
+import 'package:crypto_tracker_lite/logic/favorites_bloc.dart';
 import 'package:crypto_tracker_lite/models/crypto_model.dart';
 import 'package:crypto_tracker_lite/pages/coin_detail_page.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +21,9 @@ class CryptoListTile extends StatelessWidget {
     final isPositive = crypto.priceChangePercentage24h >= 0;
     final color = isPositive ? Colors.greenAccent : Colors.redAccent;
 
-    return BlocBuilder<FavoritesCubit, List<String>>(
-      builder: (context, favorites) {
-        final isFavorite = favorites.contains(crypto.symbol);
+    return BlocBuilder<FavoritesBloc, FavoritesState>(
+      builder: (context, state) {
+        final isFavorite = state.favorites.contains(crypto.symbol);
         final textColor = isFavorite ? Colors.yellow : Colors.white;
         final subTextColor = isFavorite ? Colors.yellow : Colors.grey;
         final iconBorderColor = isFavorite ? Colors.yellow : Colors.transparent;
@@ -121,7 +121,9 @@ class CryptoListTile extends StatelessWidget {
               // Estrella Favorito
               GestureDetector(
                 onTap: () {
-                  context.read<FavoritesCubit>().toggleFavorite(crypto.symbol);
+                  context.read<FavoritesBloc>().add(
+                    ToggleFavorite(crypto.symbol),
+                  );
                 },
                 child: Icon(
                   isFavorite ? Icons.star : Icons.star_border,

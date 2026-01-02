@@ -1,4 +1,4 @@
-import 'package:crypto_tracker_lite/logic/favorites_cubit.dart';
+import 'package:crypto_tracker_lite/logic/favorites_bloc.dart';
 import 'package:crypto_tracker_lite/models/crypto_model.dart';
 import 'package:crypto_tracker_lite/services/coingecko_api_service.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -65,12 +65,14 @@ class _CoinDetailPageState extends State<CoinDetailPage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          BlocBuilder<FavoritesCubit, List<String>>(
-            builder: (context, favorites) {
-              final isFav = favorites.contains(crypto.symbol);
+          BlocBuilder<FavoritesBloc, FavoritesState>(
+            builder: (context, state) {
+              final isFav = state.favorites.contains(crypto.symbol);
               return IconButton(
                 onPressed: () {
-                  context.read<FavoritesCubit>().toggleFavorite(crypto.symbol);
+                  context.read<FavoritesBloc>().add(
+                    ToggleFavorite(crypto.symbol),
+                  );
                 },
                 icon: Icon(
                   isFav ? Icons.star : Icons.star_border,
